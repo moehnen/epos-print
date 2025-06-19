@@ -1,45 +1,14 @@
-async function getMinMaxOfLast24h(entityId, token) {
-  const now = new Date();
-  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const startTime = yesterday.toISOString();
-  const endTime = now.toISOString();
-  const url = `http://homeassistant.local:8123/api/history/period/${startTime}?end_time=${endTime}&filter_entity_id=${entityId}&minimal_response=true`;
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  if (!response.ok) throw new Error("Fehler beim Abrufen der Historie");
-  const data = await response.json();
-  const values = data[0].map((item) => parseFloat(item.state)).filter((val) => !isNaN(val));
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  return { min, max };
-}
-
-async function getEntityState(entityId, token) {
-  const url = `http://homeassistant.local:8123/api/states/${entityId}`;
-  const response = await fetch(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    },
-  });
-  if (!response.ok) throw new Error("Fehler beim Abrufen des Status");
-  const data = await response.json();
-  return data.state;
-}
-
 const http = require("http");
+
+// Home Assistant Konfiguration
+const HA_URL = "http://homeassistant.local:8123";
+const HA_TOKEN =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhZjliOTk5YTk0YjA0Mjc2ODBlM2Q4MWZmYzE2NmM0MCIsImlhdCI6MTc1MDMyNjQ2NSwiZXhwIjoyMDY1Njg2NDY1fQ.0_p75ZwA-EkGvsxK8TkCmJezH5vb6V_kUUbaiCa5Xkc";
 
 // Drucker-IP und Port
 const printerIP = "192.168.178.69";
 const printerPort = 80; // Standard für ePOS-HTTP
 
-// Home Assistant Konfiguration
-const HA_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhZjliOTk5YTk0YjA0Mjc2ODBlM2Q4MWZmYzE2NmM0MCIsImlhdCI6MTc1MDMyNjQ2NSwiZXhwIjoyMDY1Njg2NDY1fQ.0_p75ZwA-EkGvsxK8TkCmJezH5vb6V_kUUbaiCa5Xkc";
 const SENSORS = [
   {
     name: "Kühlschrank",
@@ -60,6 +29,40 @@ const SENSORS = [
     maxTemp: 10.0,
   },
 ];
+
+
+async function getMinMaxOfLast24h(entityId, token) {
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const startTime = yesterday.toISOString();
+  const endTime = now.toISOString();
+  const url = `${HA_URL}/api/history/period/${startTime}?end_time=${endTime}&filter_entity_id=${entityId}&minimal_response=true`;
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) throw new Error("Fehler beim Abrufen der Historie");
+  const data = await response.json();
+  const values = data[0].map((item) => parseFloat(item.state)).filter((val) => !isNaN(val));
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  return { min, max };
+}
+
+async function getEntityState(entityId, token) {
+  const url = `${HA_URL}/api/states/${entityId}`;
+  const response = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  });
+  if (!response.ok) throw new Error("Fehler beim Abrufen des Status");
+  const data = await response.json();
+  return data.state;
+}
 
 // Funktion zum Drucken der Temperaturdaten
 async function printTemperatureReport() {
