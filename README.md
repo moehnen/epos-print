@@ -121,12 +121,12 @@ Min: 5.3 °C, Max: 12.7 °C
 
 Kühltruhe
 Aktuell: -17.6 °C, Batterie: 92%
-Min: -19.1 °C, Max: 29.3 °C
+Min: -19.1 °C, Max: -15.3 °C
 ----------------------------------
 
 Picknick-Kühlschrank
 Aktuell: 8.3 °C, Batterie: 85%
-Min: 6.8 °C, Max: 17.8 °C
+Min: 6.8 °C, Max: 10.8 °C
 ----------------------------------
 
 Alles OK
