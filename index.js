@@ -30,7 +30,6 @@ const SENSORS = [
   },
 ];
 
-
 async function getMinMaxOfLast24h(entityId, token) {
   const now = new Date();
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -106,8 +105,9 @@ async function printTemperatureReport() {
         console.error(`❌ Fehler bei ${sensor.name}:`, err.message);
       }
     }
-    // ePOS-Druckdaten erstellen (nur font-Attribut getestet)
+    // ePOS-Druckdaten erstellen
     // https://files.support.epson.com/pdf/pos/bulk/epos-print_xml_um_en_revk.pdf
+    // https://download4.epson.biz/sec_pubs/pos/reference_en/epos_print/ref_epos_print_xml_en_xmlforcontrollingprinter_text.html
     let printData = `<epos-print xmlns=\"http://www.epson-pos.com/schemas/2011/03/epos-print\">`;
     printData += `<text dh=\"1\" font=\"font_e\">TEMPERATURBERICHT</text>`;
     printData += `<feed line=\"1\" />`;
@@ -178,7 +178,7 @@ async function printTemperatureReport() {
       },
       timeout: 10000,
     };
-    console.log("🖨️  Sende Druckauftrag an Drucker...");
+    console.log("🖨️ Sende Druckauftrag an Drucker...");
     console.log(`📡 Verbindung zu: ${printerIP}:${printerPort}`);
     console.log("📄 XML-Daten:", printData);
     // Anfrage senden
