@@ -136,11 +136,11 @@ async function printTemperatureReport() {
 
     printData += `<feed line=\"2\" />`;
     if (tempExceededSensors.length > 0) {
-      printData += `<text font=\"font_b\" align=\"center\">TEMPERATUR ÜBERSCHRITTEN: </text>`;
+      printData += `<text font=\"font_b\" align=\"center\">TEMPERATUR ÜBERSCHRITTEN:\n </text>`;
       for (const sensor of tempExceededSensors) {
-        printData += `<text font=\"font_a\" align=\"center\">${sensor.name} (${sensor.current}°C > ${sensor.maxTemp}°C)\n</text>`;
+        printData += `<text font=\"font_a\" align=\"center\">${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C)\n</text>`;
         console.log(
-          `🌡️  Temperatur überschritten für ${sensor.name} (${sensor.current}°C > ${sensor.maxTemp}°C)`
+          `🌡️  Temperatur überschritten für ${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C)`
         );
       }
     } else {
