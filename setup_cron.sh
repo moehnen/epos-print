@@ -27,7 +27,7 @@ fi
 echo "✅ Skript gefunden: $NODE_SCRIPT"
 
 # Cron-Job Eintrag erstellen (täglich um 08:00 Uhr)
-CRON_JOB="0 8 * * * cd $SCRIPT_DIR && node index.js >> $SCRIPT_DIR/temperature_report.log 2>&1"
+CRON_JOB="0 8 * * * cd $SCRIPT_DIR && git pull && node index.js >> $SCRIPT_DIR/temperature_report.log 2>&1"
 
 # Prüfe ob der Cron-Job bereits existiert
 if crontab -l 2>/dev/null | grep -q "temperature_report"; then
