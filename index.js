@@ -108,18 +108,19 @@ async function printTemperatureReport() {
     // ePOS-Druckdaten erstellen
     // https://files.support.epson.com/pdf/pos/bulk/epos-print_xml_um_en_revk.pdf
     // https://download4.epson.biz/sec_pubs/pos/reference_en/epos_print/ref_epos_print_xml_en_xmlforcontrollingprinter_text.html
-    let printData = `<epos-print xmlns=\"http://www.epson-pos.com/schemas/2011/03/epos-print\">`;
-    printData += `<text dh=\"1\" font=\"font_e\">TEMPERATURBERICHT</text>`;
-    printData += `<feed line=\"1\" />`;
-    printData += `<text font=\"font_a\">Zeit: ${timestamp}</text>`;
-    printData += `<feed line=\"2\" />`;
+    let printData = `<epos-print xmlns="http://www.epson-pos.com/schemas/2011/03/epos-print">`;
+    printData += `<feed line="4" />`;
+    printData += `<text dh="1" dw="1" font="font_e">TEMPERATURBERICHT</text>`;
+    printData += `<feed line="1" />`;
+    printData += `<text dh="0" font="font_a">Zeit: ${timestamp}</text>`;
+    printData += `<feed line="2" />`;
     for (const report of sensorReports) {
-      printData += `<text font=\"font_b\">${report.name}\n</text>`;
-      printData += `<text font=\"font_a\">Aktuell: ${report.current} °C, Batterie: ${report.battery}%\n</text>`;
-      printData += `<text font=\"font_a\">Min: ${report.min} °C, Max: ${report.max} °C\n</text>`;
-      printData += `<feed line=\"1\" />`;
+      printData += `<text font="font_b">${report.name}\n</text>`;
+      printData += `<text font="font_a">Aktuell: ${report.current} °C, Batterie: ${report.battery}%\n</text>`;
+      printData += `<text font="font_a">Min: ${report.min} °C, Max: ${report.max} °C\n</text>`;
+      printData += `<feed line="1" />`;
       printData += `<text>----------------------------------\n</text>`;
-      printData += `<feed line=\"1\" />`;
+      printData += `<feed line="1" />`;
     }
 
     // Prüfe ob eine Temperatur überschritten wurde
@@ -134,36 +135,38 @@ async function printTemperatureReport() {
       return parseFloat(report.battery) < 18;
     });
 
-    printData += `<feed line=\"2\" />`;
+    printData += `<feed line="2" />`;
     if (tempExceededSensors.length > 0) {
-      printData += `<text font=\"font_b\" align=\"center\">TEMPERATUR ÜBERSCHRITTEN:\n </text>`;
+      printData += `<text em="1" font="font_b" align="center">TEMPERATUR ÜBERSCHRITTEN:\n </text>`;
       for (const sensor of tempExceededSensors) {
-        printData += `<text font=\"font_a\" align=\"center\">${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C)\n</text>`;
+        printData += `<text em="0" font="font_a" align="center">${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C)\n</text>`;
         console.log(
           `🌡️  Temperatur überschritten für ${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C)`
         );
       }
     } else {
-      printData += `<text font=\"font_a\" align=\"center\">Alles OK</text>`;
+      printData += `<text font="font_a" align="center">Alles OK</text>`;
       console.log("✅ Alle Temperaturen sind im normalen Bereich.");
     }
 
     // Batterie-Warnungen ausgeben
     if (lowBatterySensors.length > 0) {
-      printData += `<feed line=\"1\" />`;
-      printData += `<text font=\"font_b\" align=\"center\">BATTERIE WECHSELN: </text>`;
+      printData += `<feed line="1" />`;
+      printData += `<text em="1" font="font_b" align="center">BATTERIE WECHSELN: </text>`;
       for (const sensor of lowBatterySensors) {
-        printData += `<text font=\"font_a\" align=\"center\">${sensor.name} (${sensor.battery}%)\n</text>`;
+        printData += `<text em="0" font="font_a" align="center">${sensor.name} (${sensor.battery}%)\n</text>`;
         console.log(`🔋 Batterie wechseln für ${sensor.name} (${sensor.battery}%)`);
       }
     }
 
-    printData += `<cut type=\"feed\" />`;
+    printData += `<feed line="3" />`;
+    printData += `<cut type="feed" />`;
     printData += `</epos-print>`;
     console.log("🔍 Debug - Vollständiges XML:");
     console.log(printData);
     // SOAP-Envelope erstellen
-    const soapEnvelope = `<?xml version=\"1.0\" encoding=\"utf-8\"?><s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body>${printData}</s:Body></s:Envelope>`;
+    const soapEnvelope = `<?xml version="1.0" encoding="UTF-8"?>
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"><soapenv:Body>${printData}</soapenv:Body></soapenv:Envelope>`;
     // HTTP-Request-Optionen
     const options = {
       hostname: printerIP,
