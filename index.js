@@ -30,12 +30,12 @@ const SENSORS = [
   },
 ];
 
-async function getMinMaxOfLast24h(entityId, token) {
+async function getMinMaxOfLast24h(entityId, token, maxTemp) {
   const now = new Date();
   const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const startTime = yesterday.toISOString();
   const endTime = now.toISOString();
-  const url = `${HA_URL}/api/history/period/${startTime}?end_time=${endTime}&filter_entity_id=${entityId}&minimal_response=true`;
+  const url = `${HA_URL}/api/history/period/${startTime}?end_time=${endTime}&filter_entity_id=${entityId}&minimal_response=false`;
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -44,10 +44,28 @@ async function getMinMaxOfLast24h(entityId, token) {
   });
   if (!response.ok) throw new Error("Fehler beim Abrufen der Historie");
   const data = await response.json();
-  const values = data[0].map((item) => parseFloat(item.state)).filter((val) => !isNaN(val));
-  const min = Math.min(...values);
-  const max = Math.max(...values);
-  return { min, max };
+  const values = data[0]
+    .map((item) => ({
+      value: parseFloat(item.state),
+      timestamp: new Date(item.last_updated),
+    }))
+    .filter((item) => !isNaN(item.value));
+
+  const min = Math.min(...values.map((v) => v.value));
+  const max = Math.max(...values.map((v) => v.value));
+
+  // Finde den ersten Zeitpunkt, an dem die Temperatur überschritten wurde
+  let firstExceededTime = null;
+  if (maxTemp !== undefined && max > maxTemp) {
+    const exceededReadings = values.filter((v) => v.value > maxTemp);
+    if (exceededReadings.length > 0) {
+      // Sortiere nach Zeitstempel und nimm den ersten
+      exceededReadings.sort((a, b) => a.timestamp - b.timestamp);
+      firstExceededTime = exceededReadings[0].timestamp;
+    }
+  }
+
+  return { min, max, firstExceededTime };
 }
 
 async function getEntityState(entityId, token) {
@@ -73,7 +91,11 @@ async function printTemperatureReport() {
     for (const sensor of SENSORS) {
       try {
         const currentTemp = await getEntityState(sensor.entity, HA_TOKEN);
-        const { min, max } = await getMinMaxOfLast24h(sensor.entity, HA_TOKEN);
+        const { min, max, firstExceededTime } = await getMinMaxOfLast24h(
+          sensor.entity,
+          HA_TOKEN,
+          sensor.maxTemp
+        );
         let battery = "-";
         try {
           battery = await getEntityState(sensor.battery, HA_TOKEN);
@@ -90,6 +112,7 @@ async function printTemperatureReport() {
           max,
           battery,
           maxTemp: sensor.maxTemp,
+          firstExceededTime,
         });
         console.log(
           `🌡️  ${sensor.name}: ${currentTemp}C (Min: ${min}C, Max: ${max}C, Batterie: ${battery}%, MaxTemp: ${sensor.maxTemp}C)`
@@ -101,6 +124,7 @@ async function printTemperatureReport() {
           min: "-",
           max: "-",
           battery: "-",
+          firstExceededTime: null,
         });
         console.error(`❌ Fehler bei ${sensor.name}:`, err.message);
       }
@@ -139,9 +163,13 @@ async function printTemperatureReport() {
     if (tempExceededSensors.length > 0) {
       printData += `<text em="1" font="font_b" align="center">TEMPERATUR ÜBERSCHRITTEN:\n </text>`;
       for (const sensor of tempExceededSensors) {
+        const exceededTime = sensor.firstExceededTime
+          ? sensor.firstExceededTime.toLocaleString("de-DE")
+          : "Unbekannt";
         printData += `<text em="0" font="font_a" align="center">${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C)\n</text>`;
+        printData += `<text em="0" font="font_a" align="center">Erste Überschreitung: ${exceededTime}\n</text>`;
         console.log(
-          `🌡️  Temperatur überschritten für ${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C)`
+          `🌡️  Temperatur überschritten für ${sensor.name} (${sensor.max}°C > ${sensor.maxTemp}°C) um ${exceededTime}`
         );
       }
     } else {
