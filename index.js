@@ -136,7 +136,7 @@ async function printTemperatureReport() {
     printData += `<feed line="4" />`;
     printData += `<text dh="1" dw="1" font="font_e">TEMPERATURBERICHT</text>`;
     printData += `<feed line="1" />`;
-    printData += `<text dh="0" font="font_a">Zeit: ${timestamp}</text>`;
+    printData += `<text dh="0" dw="0" font="font_a">Zeit: ${timestamp}</text>`;
     printData += `<feed line="2" />`;
     for (const report of sensorReports) {
       printData += `<text font="font_b">${report.name}\n</text>`;
