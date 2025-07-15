@@ -47,7 +47,7 @@ async function getMinMaxOfLast24h(entityId, token, maxTemp) {
   const values = data[0]
     .map((item) => ({
       value: parseFloat(item.state),
-      timestamp: new Date(item.last_updated),
+      timestamp: new Date(item.last_changed),
     }))
     .filter((item) => !isNaN(item.value));
 
