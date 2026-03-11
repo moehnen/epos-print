@@ -1,9 +1,9 @@
 const http = require("http");
 
 // Home Assistant Konfiguration
-const HA_URL = "http://homeassistant.local:8123";
+const HA_URL = "http://homeassistant2.local:8123";
 const HA_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhZjliOTk5YTk0YjA0Mjc2ODBlM2Q4MWZmYzE2NmM0MCIsImlhdCI6MTc1MDMyNjQ2NSwiZXhwIjoyMDY1Njg2NDY1fQ.0_p75ZwA-EkGvsxK8TkCmJezH5vb6V_kUUbaiCa5Xkc";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJmMDEzMTI1ZGRjOTc0NDIxODI1MmZjNDc1MGY2N2RjMCIsImlhdCI6MTc3MzIxNzg4NiwiZXhwIjoyMDg4NTc3ODg2fQ.lkP50Q99AGPylVd6V9a4hdheyHAaB8HGobiYZlkOAUc";
 
 // Drucker-IP und Port
 const printerIP = "192.168.178.69";
@@ -12,20 +12,20 @@ const printerPort = 80; // Standard für ePOS-HTTP
 const SENSORS = [
   {
     name: "Kühlschrank",
-    entity: "sensor.lumi_lumi_weather_temperature",
-    battery: "sensor.lumi_lumi_weather_battery",
+    entity: "sensor.temperatur_kuhlschrank_temperatur",
+    battery: "sensor.temperatur_kuhlschrank_batterie",
     maxTemp: 13.0,
   },
   {
     name: "Kühltruhe",
-    entity: "sensor.lumi_lumi_weather_temperature_2",
-    battery: "sensor.lumi_lumi_weather_battery_2",
+    entity: "sensor.temperatur_truhe_temperatur",
+    battery: "sensor.temperatur_truhe_batterie",
     maxTemp: 0.0,
   },
   {
     name: "Picknick-Kühlschrank",
-    entity: "sensor.lumi_lumi_weather_temperature_3",
-    battery: "sensor.lumi_lumi_weather_battery_3",
+    entity: "sensor.temperatur_snackkuhlschrank_temperatur",
+    battery: "sensor.temperatur_snackkuhlschrank_batterie",
     maxTemp: 10.0,
   },
 ];
